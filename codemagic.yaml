@@ -1,0 +1,18 @@
+workflows:
+  ios-workflow:
+    name: Build Egg3D IPA
+    instance_type: mac_mini_m2
+    scripts:
+      - name: Build Unsigned IPA
+        script: |
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/ios
+          npx cap init "Egg3D" "com.gadenysh.egg3d" --web-dir=www
+          npx cap add ios
+          npx cap sync ios
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO CONFIGURATION_BUILD_DIR=$PWD/build
+          mkdir -p Payload
+          cp -r build/App.app Payload/
+          zip -qry Egg3D.ipa Payload
+    artifacts:
+      - Egg3D.ipa
