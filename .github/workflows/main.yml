@@ -1,0 +1,21 @@
+name: Build Unsigned IPA
+on: [workflow_dispatch, push]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/ios
+          npx cap init "Egg3D" "com.gadenysh.egg3d" --web-dir=www
+          npx cap add ios
+          npx cap sync ios
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO CONFIGURATION_BUILD_DIR=$PWD/build
+          mkdir Payload
+          cp -r build/App.app Payload/
+          zip -r Egg3D.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Egg3D-IPA
+          path: Egg3D.ipa
